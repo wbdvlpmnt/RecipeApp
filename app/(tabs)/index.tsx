@@ -1,10 +1,10 @@
-import Auth from "@/components/Auth";
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
 import { supabase } from "@/lib/supabase";
+import Navigation from "@/navigation/Navigation";
 import { Session } from "@supabase/supabase-js";
-import { useState, useEffect } from "react";
-import { View, Text } from "react-native";
 
-export default function HomeScreen() {
+export default function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -17,10 +17,5 @@ export default function HomeScreen() {
     });
   }, []);
 
-  return (
-    <View>
-      <Auth />
-      {session && session.user && <Text>{session.user.id}</Text>}
-    </View>
-  );
+  return <Navigation />;
 }

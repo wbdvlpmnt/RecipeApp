@@ -2,36 +2,55 @@ import React, { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { supabase } from "../lib/supabase";
 import { Button, Input } from "@rneui/themed";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../types"; // Import the types
+import { StackNavigationProp } from "@react-navigation/stack"; // Import StackNavigationProp
 
-export default function Auth() {
+// Type the navigation hook with the specific stack types
+type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, "Auth">;
+
+export default function AuthScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigation = useNavigation<AuthScreenNavigationProp>(); // Use the typed navigation object
+
   async function signInWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (error) Alert.alert(error.message);
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else {
+      // Navigate to Home screen on successful login
+      navigation.navigate("Home"); // Now TypeScript knows 'Home' is a valid screen
+    }
+
     setLoading(false);
   }
 
   async function signUpWithEmail() {
     setLoading(true);
+
     const {
       data: { session },
       error,
     } = await supabase.auth.signUp({
-      email: email,
-      password: password,
+      email,
+      password,
     });
 
-    if (error) Alert.alert(error.message);
-    if (!session)
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else if (!session) {
       Alert.alert("Please check your inbox for email verification!");
+    }
+
     setLoading(false);
   }
 
