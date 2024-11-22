@@ -6,12 +6,22 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+      "@types/react",
+      "@types/react-native"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./"
+    ],
+    "moduleResolution": "node"
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
+    "env.d.ts",
     "expo-env.d.ts"
   ]
 }
