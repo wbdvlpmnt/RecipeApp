@@ -15,7 +15,7 @@ export default function SignIn() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      router.replace("/"); // Redirect to home after successful sign-in
+      router.replace("/onboardingScreen"); // Redirect to home after successful sign-in
     } catch (error) {
       console.error("Sign-in error:", error);
     } finally {
