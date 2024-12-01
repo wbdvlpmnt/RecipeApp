@@ -1,6 +1,8 @@
+// pages/signin.tsx
 import { router } from "expo-router";
 import { useState } from "react";
-import { Text, TextInput, View, Button } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Input, Button, Text } from "@rneui/themed";
 import { useSession } from "../context/ctx";
 
 export default function SignIn() {
@@ -22,45 +24,71 @@ export default function SignIn() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <TextInput
+    <View style={styles.container}>
+      <Text h3 style={styles.header}>
+        Welcome Back
+      </Text>
+      <Text style={styles.subHeader}>Sign in to your account</Text>
+      <Input
         placeholder="Email"
-        value={email}
+        leftIcon={{ type: "font-awesome", name: "envelope" }}
         onChangeText={setEmail}
+        value={email}
         autoCapitalize="none"
         keyboardType="email-address"
-        style={{
-          borderWidth: 1,
-          width: "80%",
-          padding: 10,
-          marginBottom: 20,
-        }}
+        containerStyle={styles.input}
       />
-      <TextInput
+      <Input
         placeholder="Password"
-        value={password}
+        leftIcon={{ type: "font-awesome", name: "lock" }}
         onChangeText={setPassword}
+        value={password}
         secureTextEntry
-        style={{
-          borderWidth: 1,
-          width: "80%",
-          padding: 10,
-          marginBottom: 20,
-        }}
+        containerStyle={styles.input}
       />
       <Button
         title={isLoading ? "Signing in..." : "Sign In"}
         onPress={handleSignIn}
-        disabled={isLoading}
+        loading={isLoading}
+        buttonStyle={styles.button}
       />
-      <Text
-        onPress={() => {
-          router.push("/signup"); // Example: redirect to sign-up page if needed
-        }}
-        style={{ marginTop: 10 }}
-      >
-        Don't have an account? Sign up here.
+      <Text style={styles.signUpText}>
+        Don’t have an account?{" "}
+        <Text onPress={() => router.push("/signup")} style={styles.link}>
+          Sign up here
+        </Text>
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+  },
+  header: {
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  subHeader: {
+    textAlign: "center",
+    marginBottom: 20,
+    color: "gray",
+  },
+  input: {
+    marginBottom: 15,
+  },
+  button: {
+    backgroundColor: "#2D9CDB",
+  },
+  signUpText: {
+    marginTop: 20,
+    textAlign: "center",
+  },
+  link: {
+    color: "#2D9CDB",
+    fontWeight: "bold",
+  },
+});
