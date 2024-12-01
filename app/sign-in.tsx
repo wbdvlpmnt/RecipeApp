@@ -1,4 +1,3 @@
-// pages/signin.tsx
 import { router } from "expo-router";
 import { useState } from "react";
 import { Text, TextInput, View, Button } from "react-native";
