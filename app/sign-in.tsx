@@ -4,6 +4,7 @@ import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "@rneui/themed";
 import { useSession } from "../context/ctx";
+import { supabase } from "@/supabase/supabase";
 
 export default function SignIn() {
   const { signIn } = useSession();
@@ -15,7 +16,34 @@ export default function SignIn() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      router.replace("/onboardingScreen"); // Redirect to home after successful sign-in
+
+      // Fetch user data after sign-in
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        console.error("Error fetching user data:", userError);
+        return;
+      }
+
+      const userId = userData.user.id;
+
+      // Query to check if the profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle(); // Use maybeSingle() to avoid error if no rows are found
+
+      if (profileError) {
+        console.error("Error checking profile:", profileError);
+        return;
+      }
+
+      if (profile) {
+        router.replace("/"); // Profile exists, navigate to home
+      } else {
+        router.replace("/onboardingScreen"); // No profile, navigate to onboarding
+      }
     } catch (error) {
       console.error("Sign-in error:", error);
     } finally {
