@@ -80,6 +80,15 @@ export default function SignIn() {
         loading={isLoading}
         buttonStyle={styles.button}
       />
+      <Text style={styles.resetText}>
+        Forgot your password?{" "}
+        <Text
+          onPress={() => router.push("/password-reset")}
+          style={styles.link}
+        >
+          Reset your password here
+        </Text>
+      </Text>
       <Text style={styles.signUpText}>
         Don’t have an account?{" "}
         <Text onPress={() => router.push("/signup")} style={styles.link}>
@@ -112,6 +121,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#2D9CDB",
   },
   signUpText: {
+    marginTop: 20,
+    textAlign: "center",
+  },
+  resetText: {
     marginTop: 20,
     textAlign: "center",
   },
