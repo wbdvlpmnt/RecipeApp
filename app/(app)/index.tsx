@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 
 import { useSession } from "../../context/ctx";
+import { router } from "expo-router";
 
 export default function Index() {
   const { signOut } = useSession();
@@ -13,6 +14,13 @@ export default function Index() {
         }}
       >
         Sign Out
+      </Text>
+      <Text
+        onPress={() => {
+          router.replace("/post-recipe");
+        }}
+      >
+        New Recipe
       </Text>
     </View>
   );
