@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { supabase } from "../supabase/supabase"; // Adjust the import path based on your setup
+import { router } from "expo-router";
 
 export default function RecipeForm() {
   const [recipeTitle, setRecipeTitle] = useState("");
@@ -18,6 +19,8 @@ export default function RecipeForm() {
     { name: "", quantity: "", unit: "" },
   ]);
   const [steps, setSteps] = useState([""]);
+
+  const handleBackNavigation = () => router.push("/");
 
   const handleAddIngredient = () =>
     setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
@@ -86,7 +89,7 @@ export default function RecipeForm() {
         description,
         ingredients,
         steps,
-        user_id: (await supabase.auth.getUser()).data.user?.id // Get the authenticated user ID
+        user_id: (await supabase.auth.getUser()).data.user?.id, // Get the authenticated user ID
       };
 
       try {
@@ -99,6 +102,7 @@ export default function RecipeForm() {
           Alert.alert("Error", "Failed to save the recipe.");
         } else {
           Alert.alert("Success", "Recipe submitted successfully!");
+          router.push("/");
         }
       } catch (error) {
         console.error("Unexpected error:", error);
@@ -210,6 +214,14 @@ export default function RecipeForm() {
         <Icon name="paper-plane" size={18} color="#fff" />
         <Text style={styles.submitButtonText}>Submit Recipe</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={handleBackNavigation}
+      >
+        <Icon name="ban" size={18} color="#fff" />
+        <Text style={styles.addButtonText}>Cancel</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -305,5 +317,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 5,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f37521",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 20,
   },
 });
