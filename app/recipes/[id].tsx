@@ -65,9 +65,9 @@ export default function RecipeDetails() {
         <Text style={styles.title}>{recipe.title}</Text>
       </View>
 
-      {recipe.image && (
+      {recipe.image_url && (
         <Image
-          source={{ uri: recipe.image }}
+          source={{ uri: recipe.image_url }}
           style={styles.recipeImage}
           resizeMode="cover"
         />
