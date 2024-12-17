@@ -7,10 +7,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { supabase } from "../supabase/supabase"; // Adjust the import path based on your setup
 import { router } from "expo-router";
+import * as FileSystem from "expo-file-system";
 
 export default function RecipeForm() {
   const [recipeTitle, setRecipeTitle] = useState("");
@@ -19,11 +22,14 @@ export default function RecipeForm() {
     { name: "", quantity: "", unit: "" },
   ]);
   const [steps, setSteps] = useState([""]);
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleBackNavigation = () => router.push("/");
 
   const handleAddIngredient = () =>
     setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
+
   const handleRemoveIngredient = (index) =>
     setIngredients(ingredients.filter((_, i) => i !== index));
 
@@ -82,13 +88,90 @@ export default function RecipeForm() {
     return true;
   };
 
+  const handleImagePick = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (uri) => {
+    try {
+      if (!uri) {
+        throw new Error("Image URI is missing.");
+      }
+
+      setUploading(true);
+
+      console.log("Image URI:", uri);
+
+      // Sanitize file name
+      const sanitizedRecipeTitle = recipeTitle.replace(/[^a-zA-Z0-9_-]/g, "_");
+      const fileName = `${new Date().toISOString()}_${sanitizedRecipeTitle}.jpg`;
+      console.log("Generated file name:", fileName);
+
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append("file", {
+        uri,
+        name: fileName,
+        type: "image/jpeg", // Adjust based on your image type
+      });
+
+      // Perform upload
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(fileName, formData);
+
+      if (error) {
+        console.error("Supabase upload error:", error);
+        Alert.alert("Error", "Failed to upload the image.");
+        return null;
+      }
+
+      // Retrieve the public URL
+      const { data: publicUrlData, error: publicUrlError } =
+        await supabase.storage.from("images").getPublicUrl(fileName);
+
+      if (publicUrlError) {
+        console.error("Error retrieving public URL:", publicUrlError);
+        Alert.alert("Error", "Failed to retrieve public URL.");
+        return null;
+      }
+
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error("Unexpected error during image upload:", error);
+      Alert.alert(
+        "Error",
+        error.message || "An unexpected error occurred during image upload."
+      );
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (validateForm()) {
+      let imageUrl = null;
+      if (image) {
+        imageUrl = await uploadImage(image);
+        if (!imageUrl) return;
+      }
+
       const payload = {
         title: recipeTitle,
         description,
         ingredients,
         steps,
+        image_url: imageUrl,
         user_id: (await supabase.auth.getUser()).data.user?.id, // Get the authenticated user ID
       };
 
@@ -129,6 +212,12 @@ export default function RecipeForm() {
         onChangeText={setDescription}
         multiline
       />
+
+      {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
+      <TouchableOpacity style={styles.addButton} onPress={handleImagePick}>
+        <Icon name="camera" size={18} color="#fff" />
+        <Text style={styles.addButtonText}>Upload Image</Text>
+      </TouchableOpacity>
 
       <Text style={styles.sectionHeader}>Ingredients</Text>
       {ingredients.map((ingredient, index) => (
@@ -210,9 +299,15 @@ export default function RecipeForm() {
         <Text style={styles.addButtonText}>Add Step</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        disabled={uploading}
+      >
         <Icon name="paper-plane" size={18} color="#fff" />
-        <Text style={styles.submitButtonText}>Submit Recipe</Text>
+        <Text style={styles.submitButtonText}>
+          {uploading ? "Uploading..." : "Submit Recipe"}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -326,5 +421,11 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     marginTop: 20,
+  },
+  imagePreview: {
+    width: "100%",
+    height: 200,
+    marginBottom: 10,
+    borderRadius: 8,
   },
 });

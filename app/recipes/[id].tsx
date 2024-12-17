@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,6 +26,7 @@ export default function RecipeDetails() {
           .single();
 
         if (error) throw error;
+        console.log(data);
         setRecipe(data);
       } catch (err) {
         setError(err.message);
@@ -62,6 +64,14 @@ export default function RecipeDetails() {
         </TouchableOpacity>
         <Text style={styles.title}>{recipe.title}</Text>
       </View>
+
+      {recipe.image && (
+        <Image
+          source={{ uri: recipe.image }}
+          style={styles.recipeImage}
+          resizeMode="cover"
+        />
+      )}
 
       <Text style={styles.description}>{recipe.description}</Text>
 
@@ -117,6 +127,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: "center",
     flex: 1,
+  },
+  recipeImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   description: {
     fontSize: 16,
