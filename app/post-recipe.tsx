@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  FlatList,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -24,6 +25,16 @@ export default function RecipeForm() {
   const [steps, setSteps] = useState([""]);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [categories, setCategories] = useState([
+    "Breakfast",
+    "Lunch",
+    "Snacks",
+    "Healthy",
+    "Dinner",
+    "Dessert",
+    "Cocktails",
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const handleBackNavigation = () => router.push("/");
 
@@ -169,6 +180,7 @@ export default function RecipeForm() {
       const payload = {
         title: recipeTitle,
         description,
+        category: selectedCategory,
         ingredients,
         steps,
         image_url: imageUrl,
@@ -194,6 +206,18 @@ export default function RecipeForm() {
     }
   };
 
+  const renderCategoryItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => setSelectedCategory(item)}
+      style={[
+        styles.categoryButton,
+        selectedCategory === item && styles.categoryButtonSelected,
+      ]}
+    >
+      <Text style={[styles.categoryText]}>{item}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Create a Recipe</Text>
@@ -211,6 +235,15 @@ export default function RecipeForm() {
         value={description}
         onChangeText={setDescription}
         multiline
+      />
+
+      <FlatList
+        horizontal
+        data={categories}
+        keyExtractor={(item) => item}
+        renderItem={renderCategoryItem}
+        contentContainerStyle={styles.categoriesContainer}
+        showsHorizontalScrollIndicator={false}
       />
 
       {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
@@ -427,5 +460,24 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 10,
     borderRadius: 8,
+  },
+  categoriesContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+  },
+  categoryButton: {
+    backgroundColor: "#ddd",
+    paddingHorizontal: 15,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    height: 33,
+  },
+  categoryText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  categoryButtonSelected: {
+    backgroundColor: "#4CAF50",
   },
 });
